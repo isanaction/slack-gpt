@@ -1,0 +1,12 @@
+version: '3.6'
+
+services:
+  app:
+    image: golang:1.19
+    restart: always
+    tty: true
+    volumes:
+      - ./src:/go/src/go_api
+    working_dir: /go/src/go_api
+    ports:
+      - 8000:8000
