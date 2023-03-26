@@ -11,11 +11,11 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
-func handleOpenAi(prompt string) {
+func handleOpenAi(prompt string) (string, error) {
 	// .env ファイルを読み込む
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Println("Error loading .env file")
+		return "", fmt.Errorf("Error loading .env file: %w", err)
 	}
 
 	token := os.Getenv("OPENAI_TOKEN")
@@ -36,23 +36,20 @@ func handleOpenAi(prompt string) {
 	}
 	stream, err := c.CreateChatCompletionStream(ctx, req)
 	if err != nil {
-		fmt.Printf("ChatCompletionStream error: %v\n", err)
-		return
+		return "", fmt.Errorf("ChatCompletionStream error: %w", err)
 	}
 	defer stream.Close()
 
-	fmt.Printf("Stream response: ")
+	var generatedText string
 	for {
 		response, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
 			fmt.Println("\nStream finished")
-			return
+			return generatedText, nil
 		}
-
 		if err != nil {
-			fmt.Printf("\nStream error: %v\n", err)
-			return
+			return "", fmt.Errorf("Stream error: %w", err)
 		}
-		fmt.Printf(response.Choices[0].Delta.Content)
+		generatedText += response.Choices[0].Delta.Content
 	}
 }

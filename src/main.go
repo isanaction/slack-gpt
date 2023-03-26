@@ -19,7 +19,13 @@ func main() {
 			fmt.Println("アプリケーションを終了します。")
 			return
 		}
+		generatedText, err := handleOpenAi(text)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			return
+		}
 
-		handleOpenAi(text)
+		handleSlack(generatedText)
+
 	}
 }
